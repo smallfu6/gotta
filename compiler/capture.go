@@ -8,6 +8,9 @@ import "fmt"
  * 从而完成一系列优化.
  * 变量捕获主要针对闭包场景, 由于闭包函数中可能引用闭包外的变量, 因此
  * 变量捕获需要明确在闭包中通过值引用或地址引用的方式来捕获变量.
+ *
+ * 闭包变量捕获的核心逻辑位于 $GOROOT/src/cmd/compile/internal/gc/closure.go
+ * 的 capturevars 函数中.
  */
 
 func main() {
@@ -25,6 +28,8 @@ func main() {
 // 在编译过程中, 可通过下列命令查看当前程序闭包变量捕获的情况, 从输出中:
 // - a 采取 ref 引用传递方式, assign=true 代表变量a在闭包完成后进行了赋值操作
 // - b 采取了值传递的方式
-// go tool compile -m=2 main.go | grep capturing
+// go tool compile -m=2 main.go | grep capturing // 生成 .o 文件
 // capture.go:17:15: main.func1 capturing by ref: a (addr=true assign=true width=8)
 // capture.go:17:18: main.func1 capturing by value: b (addr=false assign=false width=8)
+
+// 在编译时, 加入 -m=2 标志时, 可以打印出函数的内联调试信息(./func/func.go)
