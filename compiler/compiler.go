@@ -31,8 +31,13 @@ package main
  * 编译器无法进行最佳的优化, 通常采用一种折中的方案.
  *
  * go 编译器缩写为 gc(golang compiler), 与 GC(垃圾回收)进行区分; 编译器的执行
- * 流程可细化为多个阶段, 包括词法解析, 语法解析, 抽象语法树构建, 类型检查，
- * 函数内联, 逃逸分析, 闭包重写, 遍历函数, SSA生成, 机器码生成,
+ * 流程可细化为多个阶段, 包括词法解析(./token.go), 语法解析, 抽象语法树构建,
+ * 类型检查, 变量捕获(./capture.go), 函数内联(./func), 逃逸分析(./escape.go),
+ * 闭包重写(./closure.go), 遍历函数(./walk.go), SSA生成(./ssa.go, ./ssa.html),
+ * 机器码生成(./assembler.go, ./ar.go, ./link.go, ./elf.go)
  *
- * 与 go 编译器有关的代码主要位于 $GOROOT/src/cmd/compile/internal 目录中.
+ * 与 go 编译器有关的代码主要位于 $GOROOT/src/cmd/compile/internal 目录中,
+ * go 语言的很多语法检查, 语法特性都依赖编译时, 理解编译时的基本流程, 优化方案
+ * 及一些调试技巧有助于写出更好的程序.
+ *
  */
