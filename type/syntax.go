@@ -1,16 +1,5 @@
 package main
 
-/* 类型推断原理 */
-
-/*
-   类型推断依赖编译器的处理能力, 编译器执行的过程为: 词法解析--> 语法分析-->
-   抽象语法树构建-->类型检查-->中间代码-->代码优化-->生成机器码
-
-   TODO: 源码
-   编译阶段的代码: $GOROOT/src/cmd/compile
-
-*/
-
 // 词法解析与语法分析阶段
 // $GOROOT/src/cmd/compile/internal/syntax/tokens.go line:99
 type LitKind uint8
