@@ -45,6 +45,7 @@ package main
 
 	每个 context.Context 都会从最顶层的 Goroutine 逐层传递到最底层(TODO: 结合
 	gin 框架理解), context.Context 可以在上层 Goroutine 执行出现错误时将信号
-	及时同步给下层.
+	及时同步给下层; 当最上层的 goroutine 执行失败时, 就可以在下层及时停掉无用
+	的工作以减少额外的资源消耗.
 
 */
