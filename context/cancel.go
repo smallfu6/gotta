@@ -67,12 +67,49 @@ package main
 			}()
 		}
 	}
-
 	context.propagateCancel 的作用是在 parent 和 child 之间同步取消和结束的信
 	号, 保证在 parent 被取消时, child 也会收到对应的信号, 不会出现状态不一致的
 	情况
 
 
+	// cancel closes c.done, cancels each of c's children, and, if
+	// removeFromParent is true, removes c from its parent's children.
+	func (c *cancelCtx) cancel(removeFromParent bool, err error) {
+		if err == nil {
+			panic("context: internal error: missing cancel error")
+		}
+		c.mu.Lock()
+		if c.err != nil {
+			c.mu.Unlock()
+			return // already canceled
+		}
+		c.err = err
+		if c.done == nil {
+			c.done = closedchan
+		} else {
+			close(c.done)
+		}
+		for child := range c.children {
+			// NOTE: acquiring the child's lock while holding parent's lock.
+			child.cancel(false, err)
+		}
+		c.children = nil
+		c.mu.Unlock()
+
+		if removeFromParent {
+			removeChild(c.Context, c)
+		}
+	}
+	context.cancelCtx.cancel 的作用是关闭上下文中的 Channel 并向所有子上下文同
+	步取消信号.
+
+
+	TODO: 函数实现
+	context.WithDeadline 在创建 context.timerCtx 的过程中判断了父上下文的截止
+	日期与当前日期, 并通过 time.AfterFunc 创建定时器, 当时候超过截止日期后会
+	调用 context.timerCtx.cancel 同步取消信号.
+	context.timerCtx 内部不仅通过嵌入 context.cancelCtx 结构体继承了相关变量和
+	方法, 还通过持有的定时器 timer 和截止事件 deadline 实现了定时取消功能.
 
 
 */
