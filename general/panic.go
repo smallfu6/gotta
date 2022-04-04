@@ -14,6 +14,13 @@ import (
 	recover 只有在 defer 中调用才会生效, recover 只有在发生 panic 之后调用
 	才会生效;
 
+
+	TODO: 函数栈帧, goroutine 结构中对 panic 和 defer 的存储
+	recover() 函数调用有严格的要求, 必须在 defer 函数中直接调用, 如果调用的
+	是 recover 的包装函数或在嵌套的 defer 里调用都不能捕获异常; 即 recover
+	必须要和有异常的栈帧只隔一个栈帧, recover 函数才能捕获异常; 换言之 recover
+	捕获的是祖父一节调用函数栈帧的异常(刚好可以跨越一层 defer 函数)
+
 */
 
 // 跨协程失效
@@ -34,7 +41,7 @@ func MoreGoroutine() {
 	defer 关键字对应的 runtime.deferproc 会将延迟调用函数与调用方所在 goroutine
 	进行关联; 所以当程序发生崩溃, 只会调用当前 goroutine 的延迟调用函数;
 
-	多个 goroutine 之间没有太多关联, 一个 goroutine 在触发 panic 时不应该只需
+	多个 goroutine 之间没有太多关联, 一个 goroutine 在触发 panic 时也不应该执行
 	其他 goroutine 的延迟函数;
 */
 
@@ -50,6 +57,7 @@ func main() {
 	panic("panic once")
 }
 
+// TODO: 为何是以下的执行顺序?
 // in main
 // panic: panic once
 //         panic: panic again
@@ -86,4 +94,5 @@ func main() {
 	runtime.Goexit 能够只结束调用该函数的 Goroutine 而不影响其他 Goroutine,
 	但是该函数会被 defer 中的 panic 和 recover 取消, 引入这3个字段为了保证该
 	函数一定会生效;
+
 */
