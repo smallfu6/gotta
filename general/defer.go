@@ -71,7 +71,7 @@ func scope() {
 // defer runs
 /*
 	defer 传入的函数不是在退出代码块的作用域时执行的, 它只会在当前函数的方法
-	返回之前被调用;
+	返回之前被调用(?)
 */
 
 func scopeForManyDefer() {
@@ -92,26 +92,21 @@ func scopeForManyDefer() {
 //------------ defer 使用传值的方式传递参数时会进行预计算, 会导致结果不符合预期
 func preComputed() {
 	startAt := time.Now()
-	// 可以这样理解:
-	// golang 的参数是值传递的, 函数入参时在函数作用域需要新建参数并完成参数的
-	// 复制(副本), 所以必须理解计算参数的值;
-	// 但如果使用函数, 值传递时复制的是函数的指针, 当 defer 后的函数真正执行
-	// 时才会访问外部参数的值
 	defer fmt.Println(time.Since(startAt))
 
 	time.Sleep(time.Second)
 }
 
 // 103ns
+// 向 defer 关键字传入匿名函数解决上面的问题:(其实是使用了匿名函数的延迟绑定)
+// defer func() { fmt.Println(time.Since(startAt)) }()
 
 /*
 	TODO: 深入理解
-	调用 defer 关键字会[立刻]复制函数中引用的外部参数, 所以 time.Since(startAt)
-	的结果不是在 main 函数退出之前计算的, 而是在 defer 关键字调用时计算的
+	调用 defer 关键字会[立刻]复制函数中引用的外部参数(值传递), 所以
+	time.Since(startAt) 的结果不是在 main 函数退出之前计算的,
+	而是在 defer 关键字调用时计算的
 
-	向 defer 关键字传入匿名函数解决上面的问题:
-	defer func() { fmt.Println(time.Since(startAt)) }()
-	go 中的函数是引用类型, 在值传递时会复制函数的指针, 所以在 main 函数退出
-	之前才会计算 time.Since(startAt) 的结果;
-
+	如果使用匿名函数, 利用闭包的延迟绑定, defer 后的函数真正执行时才会
+	访问外部参数的值
 */
