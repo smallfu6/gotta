@@ -19,4 +19,5 @@ func main() {
 	var s *TestStruct
 	fmt.Println(s == nil)    // true
 	fmt.Println(NilOrNot(s)) // false
+	// 传入后带了类型信息, 即接口存储 *TestStruct 动态类型, 其动态值是 nil
 }
