@@ -1,5 +1,10 @@
 package main
 
+/*
+	<go语言底层原理剖析> Page173
+	TODO: 基准测试, 通过基准测试分析程序的内存操作, 栈堆
+*/
+
 import "testing"
 
 func BenchmarkDirect(b *testing.B) {
