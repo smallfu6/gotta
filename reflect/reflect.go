@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"reflect"
+)
+
 /*
 
 	TODO: 源码, 实践
@@ -49,3 +54,48 @@ package main
 	reflect 包提供了多种能力, 包括如何使用反射来动态修改变量, 判断类型是
 	否实现了某些接口以及动态调用方法等功能;(TODO:实践)
 */
+
+type User struct {
+	Id   int
+	Name string
+	Age  int
+}
+
+func (u User) ReflectCallFunc() {
+	fmt.Println("call ReflectCallFunc")
+}
+
+// 遍历结构体字段
+func LoopStructField() {
+	var user = User{Id: 1, Name: "json", Age: 23}
+	getType := reflect.TypeOf(user)
+	getValue := reflect.ValueOf(user)
+	for i := 0; i < getType.NumField(); i++ {
+		field := getType.Field(i)
+		value := getValue.Field(i).Interface()
+		fmt.Println(field.Name, field.Type, value)
+	}
+
+	/*
+		reflect.Type 的 Field 方法主要用于获取结构体的元数据, 其返回的结构
+		体 StructField 如下:
+		// A StructField describes a single field in a struct.
+		type StructField struct {
+			// Name is the field name.
+			Name string
+
+			// PkgPath is the package path that qualifies a lower case (unexported)
+			// field name. It is empty for upper case (exported) field names.
+			// See https://golang.org/ref/spec#Uniqueness_of_identifiers
+			PkgPath string
+
+			Type      Type      // field type
+			Tag       StructTag // field tag string
+			Offset    uintptr   // offset within struct, in bytes
+			Index     []int     // index sequence for Type.FieldByIndex
+			Anonymous bool      // is an embedded field
+		}
+
+		reflect.Value 的 Field 方法主要返回 reflect.Value
+	*/
+}
