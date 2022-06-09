@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 /*
 	channel 是 go 核心的数据结构和 goroutine 之间的通信方式, channel 是支撑 go
 	语言高性能并发编程模型的重要结构;
@@ -26,13 +28,13 @@ package main
 		CSP 思想: "不要通过共享内存的方式进行通信, 而应该通过通信的方式共享内存"
 
 
-	TODO:源码
+	TODO:源码, 环形队列
 	go 采用 csp 并发编程思想, 将通道作为协程之间交流的原语, 屏蔽了传统多线
 	程编程中底层实现的诸多细节; 产生了很多经典的并发模型(ping-pong, fan-in,
-	fan-out, pipeline);
+	fan-out, pipeline); TODO: 熟悉常见的并发模型
 	通道底层是用锁实现的环形队列, goroutine 在读取和写入时如果不能直接操作则
 	会被放入等待队列中陷入休眠状态;  借助 go 运行时的调度器, 通道不会堵塞
-	程序的执行(协程阻塞, 不就是堵塞了程序的执行?), 并且协程能够在需要时被唤醒;
+	程序的执行(协程阻塞, 调度到其他的协程继续执行), 并且协程能够在需要时被唤醒;
 
 	在实际中, 一个协程通常会处理多个通道, 我们不希望由于一个通道的读写而陷入
 	阻塞, 影响其他通道的正常读写; 因此在实际中, 更多会使用 select 多路复用的
@@ -209,5 +211,12 @@ package main
 		runtime.selectnbrecv 和 runtime.selectnbsend 非阻塞地执行收发操作;
 	4. 在默认情况下会通过 runtime.selectgo 获取执行 case 的索引, 并通过多
 		个 if 语句执行对应 case 中的代码
+
+
+	一个为 nil 的通道, 不管是读取还是写入都将陷入阻塞状态(注意: 不会panic),
+	当 select 对 nil 通道进行操作时, case 分支将永远不会执行;
+
+	select 的每个 case 语句都必须对应通道的读写操作,否则编译不通过
+	// select case must be send or receive
 
 */

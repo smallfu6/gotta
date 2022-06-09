@@ -7,7 +7,7 @@ import (
 
 /*
 
-	TODO: 源码, 实践
+	TODO: 前期只做简单了解和使用, 底层原理熟悉后再做深入研究
 	反射在大多数应用和服务中并不常见, 但是很多框架依赖 go 语言的反射机制简化
 	代码; 因为 go 语言的语法元素很少, 设计简单, 所以其表达能力不够强, 但是 go
 	的 reflect 包能弥补语法上的一些劣势;
@@ -53,6 +53,42 @@ import (
 
 	reflect 包提供了多种能力, 包括如何使用反射来动态修改变量, 判断类型是
 	否实现了某些接口以及动态调用方法等功能;(TODO:实践)
+
+
+	反射底层原理:
+	// TypeOf returns the reflection Type that represents the dynamic type of i.
+	// If i is a nil interface value, TypeOf returns nil.
+	func TypeOf(i any) Type {
+		eface := *(*emptyInterface)(unsafe.Pointer(&i))
+		return toType(eface.typ)
+	}
+
+	// emptyInterface is the header for an interface{} value.
+	type emptyInterface struct {
+		typ  *rtype
+		word unsafe.Pointer
+	}
+
+	reflect.TypeOf 将传入的接口变量转换为底层的实际空接口 emptyInterface,
+	并获取空接口的类型值; reflect.Type 实质上是空接口结构体中的 typ 字段,
+	是 *rtype 类型, go 中的任何具体类型的底层结构都包含这一类型;
+
+	reflect.ValueOf 函数的核心是调用了 unpackEface 函数, reflect.Value 包含了
+	接口中存储的值及类型, 除此之外还包含了特殊的 flag 标志; (TODO: 了解)
+	// unpackEface converts the empty interface i to a Value.
+	func unpackEface(i any) Value {
+		e := (*emptyInterface)(unsafe.Pointer(&i))
+		// NOTE: don't read e.word until we know whether it is really a pointer or not.
+		t := e.typ
+		if t == nil {
+			return Value{}
+		}
+		f := flag(t.Kind())
+		if ifaceIndir(t) {
+			f |= flagIndir
+		}
+		return Value{t, e.word, f}
+	}
 */
 
 type User struct {
