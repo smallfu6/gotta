@@ -5,4 +5,8 @@
 - 类型系统
 - Context
 - Interface
-
+- Channel
+- GC
+- Escape
+- Closure
+- Reflect

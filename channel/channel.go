@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 /*
 	channel 是 go 核心的数据结构和 goroutine 之间的通信方式, channel 是支撑 go
 	语言高性能并发编程模型的重要结构;
