@@ -8,21 +8,21 @@ import "fmt"
 	循环;
 */
 
-// 循环永动机? 在遍历切片的同时追加元素
+func main() {
+	isForeverLoop()
+}
 func isForeverLoop() {
-	// TODO: 汇编
 	arr := []int{1, 2, 3}
 	for _, v := range arr {
 		arr = append(arr, v)
 	}
 	fmt.Println(arr) // [1, 2, 3, 1, 2, 3]
-	// 对于所有 range 循环,  go 都会在编译期间将原切片或者数组赋值给一个新
-	// 变量 ha, 在赋值过程中就发生了复制, 并且通过 len 关键字预先获取了切片
-	// 的长度, 所以在循环中追加新元素不会改变循环执行的次数;
 
-	// 同时遍历索引和元素的 range, go 会额外创建一个新的 v2 变量存储切片
-	// 中的元素, 循环中使用这个变量 v2 会在每一次迭代被重新赋值而覆盖.
-	// 赋值时也会触发复制;
+	// for 循环会在堆上(栈?)申请新的内存地址存储 arr, _, v 等变量, 其作用域在
+	// for 循环内; go 是值传递的, 所以在 for 语句中的 arr 只是函数内的 arr
+	// 变量的一个副本; 对于所有 range 循环,  go 都会在编译期间将原切片或者
+	// 数组赋值给一个新变量, 在赋值过程中就发生了复制, 并且通过 len 关键字
+	// 预先获取了切片的长度, 所以在循环中追加新元素不会改变循环执行的次数;
 }
 
 // 清空切片
@@ -40,7 +40,10 @@ func clearSlice() {
 // 清空切片中的数据
 
 /*
-map(TODO: 底层结构, 溢出桶, 扩容)
+	map 使用 range 遍历与上述 slice 遍历同理, 在遍历内部增加 map 的长度不会
+	改变 for 循环的次数;
+
+	map(TODO: 底层结构, 溢出桶, 扩容)
 	在遍历哈希表时, 编译器会使用 runtime.mapiterinit 和 runtime.mapiternext
 	两个运行时函数重写 for-range 循环
 	- runtime.mapiterinit:
