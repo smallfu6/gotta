@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"time"
+)
+
 /*
 	由于无缓冲channel的运行时层实现不带有缓冲区, 因此对无缓冲channel的接收
 	和发送操作是同步的, 即对于同一个无缓冲channel, 只有在对其进行接收操作
@@ -92,4 +97,76 @@ package main
 	取将阻塞在channel上, 导致后面逻辑失效; 因此为了不阻塞在channel上, 常见
 	的方法是将判空与读取放在一个事务中，将判满与写入放在一个事务中,
 	而这类事务我们可以通过select实现;
+
+*/
+
+func producer(c chan<- int) {
+	var i int = 1
+	for {
+		time.Sleep(2 * time.Second)
+		ok := trySend(c, i)
+		if ok {
+			fmt.Printf("[producer]: send [%d] to channel\n", i)
+			i++
+			continue
+		}
+		fmt.Printf("[producer]: try send [%d], but  channel is full\n", i)
+	}
+}
+
+// select 事务
+func tryRecv(c <-chan int) (int, bool) {
+	select {
+	case i := <-c:
+		return i, true
+	default:
+		return 0, false
+	}
+}
+
+// select 事务
+func trySend(c chan<- int, i int) bool {
+	select {
+	case c <- i:
+		return true
+	default:
+		return false
+	}
+}
+
+func consumer(c <-chan int) {
+	for {
+		i, ok := tryRecv(c)
+		if !ok {
+			fmt.Println("[consumer]: try to recv from channel, but the channel is empty")
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		fmt.Printf("[consumer]: recv [%d] from channel\n", i)
+		if i >= 3 {
+			fmt.Println("[consumer]: exit")
+			return
+		}
+	}
+}
+
+func main() {
+	c := make(chan int, 3)
+	go producer(c)
+	go consumer(c)
+	select {}
+}
+
+/*
+	上述使用事务的这种方法适合大多数场合, 但是它改变了channel的
+	状态: 接收或发送了一个元素; 有时想在不改变channel状态的前提下
+	单纯地侦测channel的状态, 又不会因channel满或空阻塞在channel上;
+	很遗憾目前没有一种方法既可以实现这样的功能又适用于所有场合,
+	在特定的场景下可以用len(channel)来实现:
+	- 多发送单接收的场景: 即有多个发送者, 但有且只有一个接收者; 可以在
+		接收者goroutine中根据len(channel)是否大于0来判断channel中是否
+		有数据需要接收;
+	- 多接收单发送的场景m 即有多个接收者, 但有且只有一个发送者; 可以在
+		发送goroutine中根据len(channel)是否小于cap(channel)来判断是否
+		可以执行向channel的发送操作;
 */
