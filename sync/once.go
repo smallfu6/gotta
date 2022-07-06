@@ -1,8 +1,11 @@
 package main
 
 /*
-	sync.Once 可以保证程序在运行器件某段代码只执行一次
-	TODO: 应用场景
+	在程序运行期间只被执行一次且goroutine安全的函数只有每个包的init函数,
+	sync包提供了另一种更为灵活的机制, 可以保证任意一个函数在程序运行期间
+	只被执行一次; sync.Once的语义十分适合实现单例(singleton, TODO)模式,
+	并且实现起来十分简单;
+	TODO: 探索应用场景
 */
 
 import (
