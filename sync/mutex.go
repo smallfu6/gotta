@@ -1,13 +1,25 @@
 package main
 
+import (
+	"log"
+	"sync"
+	"time"
+)
+
 /*
 	sync.Mutex(TODO:源码)
-*/
+	// A Mutex is a mutual exclusion lock.
+	// The zero value for a Mutex is an unlocked mutex.
 
-type Mutex struct {
-	state int32  // 表示当前互斥锁的状态
-	sema  uint32 //用于控制锁状态的信号量(TODO: 进程调度中的信号量)
-}
+	// A Mutex must not be copied after first use.
+	type Mutex struct {
+	   state int32  // 表示当前互斥锁的状态
+	   sema  uint32 // 用于控制锁状态的信号量(TODO: 进程调度中的信号量)
+	}
+	sync包中类型的实例在首次使用后被复制得到的副本一旦再被使用将
+	导致不可预期的结果, 为此在使用sync包中类型时, 推荐通过闭包方
+	式或传递类型实例(或包裹该类型的类型实例)的地址或指针的方式使用
+*/
 
 // 只占8字节空间的结构体表示了 go 语言中的互斥锁.
 
@@ -261,4 +273,78 @@ type Mutex struct {
 	直接调用 sync.runtime_Semrelease, 将当前锁交给下一个正在尝试获取锁的等待者,
 	等待者被唤醒后会得到锁, 这时互斥锁不会退出饥饿状态;
 
+*/
+
+type foo struct {
+	n int
+	sync.Mutex
+}
+
+func main() {
+	f := foo{n: 17}
+	go func(f foo) {
+		for {
+			log.Println("g2: try to lock foo...")
+			f.Lock()
+			log.Println("g2: lock foo ok")
+
+			time.Sleep(3 * time.Second)
+
+			f.Unlock()
+			log.Println("g2: unlock foo ok")
+		}
+	}(f)
+
+	f.Lock()
+	log.Println("g1: lock foo ok")
+
+	go func(f foo) {
+		for {
+			log.Println("g3: try to lock foo...")
+			f.Lock()
+			log.Println("g3: lock foo ok")
+
+			time.Sleep(5 * time.Second)
+
+			f.Unlock()
+			log.Println("g3: unlock foo ok")
+		}
+	}(f)
+
+	time.Sleep(1000 * time.Second)
+	f.Unlock()
+	log.Println("g1: unlock foo ok")
+}
+
+// 2022/07/06 12:13:26 g1: lock foo ok
+// 2022/07/06 12:13:26 g3: try to lock foo...
+// 2022/07/06 12:13:26 g2: try to lock foo...
+// 2022/07/06 12:13:26 g2: lock foo ok
+// 2022/07/06 12:13:29 g2: unlock foo ok
+// 2022/07/06 12:13:29 g2: try to lock foo...
+// 2022/07/06 12:13:29 g2: lock foo ok
+// 2022/07/06 12:13:32 g2: unlock foo ok
+// 2022/07/06 12:13:32 g2: try to lock foo...
+// 2022/07/06 12:13:32 g2: lock foo ok
+// 2022/07/06 12:13:35 g2: unlock foo ok
+// 2022/07/06 12:13:35 g2: try to lock foo...
+// 2022/07/06 12:13:35 g2: lock foo ok
+
+/*
+	创建了两个goroutine: g2和g3; 运行的结果显示: g3阻塞在加锁操作上了, 而按g2
+	则按预期正常运行; g2和g3的差别就在于g2是在互斥锁首次使用之前创建的, 而g3
+	则是在互斥锁执行完加锁操作并处于锁定状态之后创建的, 并且程序在创建g3的时候
+	复制了foo的实例(包含sync.Mutex的实例)并在之后使用了这个副本;
+
+
+	对Mutex实例的复制即是对两个整型字段的复制, 在初始状态下, Mutex实例处于
+	Unlocked状态(state和sema均为0); g2复制了处于初始状态的Mutex实例,
+	副本的state和sema均为0, 这与g2自定义一个新的Mutex实例无异, 这决定了g2
+	后续可以按预期正常运行;
+
+	后续主程序调用了Lock方法, Mutex实例变为Locked状态(state字段值
+	为sync.mutex-Locked); 而此后g3创建时恰恰复制了处于Locked状态的
+	Mutex实例(副本的state字段值亦为sync.mutexLocked); 因此g3
+	再对其实例副本调用Lock方法将会导致其进入阻塞状态(也是死锁状态, 因为
+	没有任何其他机会调用该副本的Unlock方法了, 并且Go不支持递归锁）
 */
