@@ -1,11 +1,15 @@
 package main
 
-/* sync.WaitGroup (TODO: 源码) */
+/*
+	sync.WaitGroup(TODO: 源码)
+	sync.WaitGroup 可以等待一组 goroutine 返回; 一个常见的场景是批量发出
+	RPC 或者 HTTP 请求
+*/
 
 import (
 	"sync"
-) // sync.WaitGroup 可以等待一组 goroutine 返回; 一个常见的场景是批量发出
-// RPC 或者 HTTP 请求
+)
+
 type Request struct{}
 
 func main() {
@@ -19,6 +23,8 @@ func main() {
 			// ...
 		}(req)
 	}
+
+	wg.Wait()
 }
 
 /*
