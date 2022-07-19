@@ -29,3 +29,23 @@ func UseNestStruct() {
 	}
 	fmt.Println(nest)
 }
+
+func NestStructVar() {
+	var x = struct {
+		Header struct {
+			Url    string
+			Method string
+		}
+		Content string
+	}{
+		Header: struct {
+			Url    string
+			Method string
+		}{
+			Url:    "url",
+			Method: "method",
+		},
+		Content: "content",
+	}
+	fmt.Println(x)
+}
