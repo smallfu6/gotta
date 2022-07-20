@@ -58,3 +58,11 @@ func main() {
 	所以转换后类型T2的对齐系数不能比转换前类型T1的对齐系数更严格,
 	即Alignof(T1) >= Alignof(T2);
 */
+
+/*
+	Go 1.14编译器在-race和-msan命令行选型开启的情况下，会执行-d=checkptr检查,
+	确保当将*T1类型按模式1通过unsafe.Pointer转换为*T2时, T2的内存地址对齐系数
+	不能高于T1的对齐系数;
+*/
+// go run -race align_under_pattern1.go
+// fatal error: checkptr: converted pointer straddles multiple allocations
