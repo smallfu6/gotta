@@ -46,6 +46,13 @@ import (
 		- 调用 reflect.Value.Elem 获取指针指向的变量
 		- 调用 reflect.Value.Set[Type] 更新变量的值
 
+	反射可以获取go变量实例的类型信息和值信息的关键在于, reflect.TypeOf 和
+	reflect.ValueOf 利用了 interface{} 类型的形式参数对传入的实际参数(go
+	变量实例)的析构能力(TODO: 理解析构语义), TypeOf 和 ValueOf 分别将得到
+	的值信息和类型信息存储在 reflect.Value 对象和 reflect.Type 对象中;
+	(其中 reflect.ValueOf().Type() 等价于 reflect.TypeOf()) 然后就可以通过
+	reflect.Value 实例和 reflect.Type 实例进行值信息和类型信息的检视;
+
 
 	方法调用:
 	./add.go
