@@ -55,6 +55,12 @@ package main
 		复用模型由内核实现可读/可写事件的通知, 避免了非阻塞模型中轮询
 		带来的CPU计算资源的浪费;
 
+		多路复用函数会阻塞的监听一组文件描述符, 当文件描述符的状态变为
+		可读或可写时, select 会返回可读事件或可写事件的个数, 应用程序
+		可以在输入的文件描述符中查找哪些可读或可写, 然后执行相应操作;
+
+
+
 	4. 异步I/O模型
 		用户应用线程发起异步I/O调用后, 内核将启动等待数据的操作并马上返回;
 		之后, 用户应用线程可以继续执行其他操作, 既无须阻塞, 也无须轮询并再
@@ -85,5 +91,21 @@ package main
 	多路复用函数, 比如Linux上的epoll、Windows上的iocp、FreeBSD/macOS上的
 	kqueue、Solaris上的event port等, 这样可以最大限度地提高netpoller的调
 	度和执行性能;
+	操作系统中还提供了比较相似的 poll 函数, 其使用链表存储文件描述符,
+	摆脱了1024的数量上限; TODO
 
+	Socket 属性
+	原生Socket API提供了丰富的sockopt设置接口, 而Go有自己的网络编程模型;
+	Go提供的socket options接口也是基于上述模型的必要的属性设置,
+	包括SetKeepAlive、SetKeep-AlivePeriod、SetLinger、SetNoDelay (默认为no
+	delay)、SetWriteBuffer、SetReadBuffer等(TODO)
+
+	tcpConn, ok := c.(*TCPCon)
+	if !ok {
+		// 错误处理
+	}
+
+	tcpConn.SetNoDealy(true)
+	对于 listener 的监听 Socket, go 默认设置了SO_REUSEADDR, 这样重启服务,
+	不会因 address in use 的错误而重启失败;
 */
