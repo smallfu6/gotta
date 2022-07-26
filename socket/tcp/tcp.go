@@ -1,6 +1,7 @@
 package main
 
 /*
+	TODO: tcp 协议
 	TCP 连接的建立
 
 	建立 TCP Socket 连接需要经历客户端和服务端的三次握手过程, 在连接的建立过程
@@ -226,5 +227,15 @@ package main
 		而另三分之二被goroutine-2读走的情况; 比如一个完整数据包"world",
 		当goroutine的读缓冲区长度小于5时, 存在这样一种可能: 一个goroutine
 		读出"worl", 而另一个goroutine读出"d";
+
+
+		关闭连接
+
+		在己方已经关闭的Socket上再进行Read和Write操作, 会得到"use of closed
+		network connection"的错误;
+		在对方关闭的Socket上执行Read操作会得到EOF错误, 但Write操作依然会成功,
+		因为数据会成功写入己方的内核Socket缓冲区中, 即便最终发不到对方的
+		Socket缓冲区(因为己方Socket尚未关闭); 因此当发现对方Socket关闭时,
+		己方应该正确处理自己的Socket, 再继续进行Write操作已经无任何意义了;
 
 */
