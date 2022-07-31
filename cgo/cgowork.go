@@ -10,7 +10,8 @@ package main
 // char *foo = "hellofoo";
 import "C" // 与上面的C代码之间不能用空行分隔, 这里的"C"不是包名, 而是一种类似
 // 名字空间的概念, 也可以理解为伪包名, C语言所有语法元素均在该伪包下面; 访问
-// C语法元素时都要在其前面加上伪包C的前缀,
+// C语法元素时都要在其前面加上伪包C的前缀;
+// 上面的C代码也可以使用 /* */ 进行注释, cgo 仍能解析
 
 import (
 	"fmt"
@@ -20,6 +21,7 @@ import (
 func main() {
 	s := "Hello, Cgo"
 	cs := C.CString(s)
+	fmt.Printf("%T\n", cs) // *main._Ctype_char
 	defer C.free(unsafe.Pointer(cs))
 	C.print(cs)                                  // Hello, Cgo
 	fmt.Printf("%T: %[1]s\n", C.GoString(C.foo)) // string

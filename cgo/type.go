@@ -24,4 +24,21 @@ package main
 	相当于在go世界重新分配一块内存对象, 并复制了C的字符串(foo)的信息, 后续
 	这个位于go世界的新的string类型对象将和其他go对象一样接受GC的管理;
 
+	数组类型
+	C语言中的数组与C中的指针在大部分场合可以随意切换; Go语言中的数组是原生
+	的值类型, Go仅提供了C.GoBytes将C中的char类型数组转换为Go中的[]byte切片类型;
+	./cchar_array_to_bobyte_slice.go
+
+	枚举类型
+	./c_enum.go
+
+
+	结构体类型
+	./c_struct.go
+
+	联合体(union)
+
+
+
+
 */
