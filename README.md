@@ -11,3 +11,6 @@
 - Closure
 - Reflect
 - Delve
+- Cgo
+- Sync
+- Unsafe
